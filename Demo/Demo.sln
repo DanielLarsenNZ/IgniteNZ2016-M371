@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Server2016_Docker_VMA_MMA.  SQL_PaaS", "Server2016_Docker_SQL_PaaS\Server2016_Docker_VMA_MMA.  SQL_PaaS.deployproj", "{A5145670-BF63-43B1-B666-B140B3A4C569}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CamDan.Ticketer.Api", "CamDan.Ticketer.Api\CamDan.Ticketer.Api.csproj", "{3B2CA47D-91D8-4A0A-9152-A91170FAEB68}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5145670-BF63-43B1-B666-B140B3A4C569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5145670-BF63-43B1-B666-B140B3A4C569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5145670-BF63-43B1-B666-B140B3A4C569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5145670-BF63-43B1-B666-B140B3A4C569}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B2CA47D-91D8-4A0A-9152-A91170FAEB68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B2CA47D-91D8-4A0A-9152-A91170FAEB68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B2CA47D-91D8-4A0A-9152-A91170FAEB68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B2CA47D-91D8-4A0A-9152-A91170FAEB68}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

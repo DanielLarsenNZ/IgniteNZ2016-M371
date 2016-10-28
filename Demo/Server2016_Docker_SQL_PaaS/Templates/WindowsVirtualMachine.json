@@ -1,0 +1,633 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "VMAdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+
+    "VMAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+
+    "VMSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS3",
+      "metadata": {
+        "description": "VM Size"
+      }
+    },
+
+    "DBAdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "This is database server administrator login name."
+      }
+    },
+    "DBAdminUsernamePassword": {
+      "type": "string",
+      "metadata": {
+        "description": "This is database server administrator login password"
+      }
+    },
+    "DBCollation": {
+      "type": "string",
+      "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+      "metadata": {
+        "description": "This is database collation - rule for comparing the encodings in the database"
+      }
+    },
+    "DBEdition": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Business",
+        "Premium",
+        "Standard"
+      ],
+      "metadata": {
+        "description": "This is database edition"
+      }
+    },
+
+    "VMExtensionVMAgent": {
+      "type": "string",
+      "metadata": {
+        "description": "VM Agent extension name"
+      }
+    },
+
+    "VMExtensionMonitoringAgent": {
+      "type": "string",
+      "metadata": {
+        "description": "Monitoring Agent extension name"
+      }
+    },
+
+    "OMSMonitoringAgentWorkspaceID": {
+      "type": "string",
+      "metadata": {
+        "description": "Monitoring Agent Workspace ID extension name"
+      }
+    },
+
+    "OMSMonitoringAgentWorkspaceKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Monitoring Agent Workspace Key extension name"
+      }
+    },
+
+    "VSOAccount": {
+      "type": "string",
+      "metadata": {
+        "description": "The Visual Studio Online account name, that is, the first part of your VSOAccount.visualstudio.com"
+      }
+    },
+    "VSOUser": {
+      "type": "string",
+      "metadata": {
+        "description": "The Visual Studio Online user configured as Alternate Authentication Credentials."
+      }
+    },
+    "VSOPass": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The Visual Studio Online password configured as Alternate Authentication Credentials."
+      }
+    },
+    "PoolName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Visual Studio Online build agent pool for this build agent to join. Use 'Default' if you don't have a separate pool."
+      }
+    },
+
+    "DSCModulesURL": {
+      "type": "string",
+      "defaultValue": "https://github.com/Azure/azure-quickstart-templates/raw/master/dsc-extension-azure-automation-pullserver/UpdateLCMforAAPull.zip",
+      "metadata": {
+        "description": "URL for the DSC configuration package. NOTE: Can be a Github url(raw) to the zip file (this is the default value)"
+      }
+    },
+    "DSCConfigurationFunction": {
+      "type": "string",
+      "defaultValue": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
+      "metadata": {
+        "description": "DSC configuration function to call. Should contain filename and function in format fileName.ps1\\DSCConfigurationFunction"
+      }
+    },
+    "DSCRegistrationKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Registration key to use to onboard to the Azure Automation DSC pull/reporting server"
+      }
+    },
+    "DSCRegistrationURL": {
+      "type": "string",
+      "metadata": {
+        "description": "Registration url of the Azure Automation DSC pull/reporting server"
+      }
+    },
+    "DSCNodeConfigurationName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the node configuration, on the Azure Automation DSC pull server, that this node will be configured as"
+      }
+    },
+    "DSCConfigurationMode": {
+      "type": "string",
+      "defaultValue": "ApplyAndMonitor",
+      "allowedValues": [
+        "ApplyOnly",
+        "ApplyAndMonitor",
+        "ApplyAndAutoCorrect"
+      ],
+      "metadata": {
+        "description": "DSC agent (LCM) configuration mode setting. ApplyOnly, ApplyAndMonitor, or ApplyAndAutoCorrect"
+      }
+    },
+    "DSCConfigurationModeFrequencyMins": {
+      "type": "int",
+      "defaultValue": 15,
+      "metadata": {
+        "description": "DSC agent (LCM) configuration mode frequency setting, in minutes"
+      }
+    },
+    "DSCRefreshFrequencyMins": {
+      "type": "int",
+      "defaultValue": 30,
+      "metadata": {
+        "description": "DSC agent (LCM) refresh frequency setting, in minutes"
+      }
+    },
+    "DSCRebootNodeIfNeeded": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "DSC agent (LCM) DSCRebootNodeIfNeeded setting"
+      }
+    },
+    "DSCactionAfterReboot": {
+      "type": "string",
+      "defaultValue": "ContinueConfiguration",
+      "allowedValues": [
+        "ContinueConfiguration",
+        "StopConfiguration"
+      ],
+      "metadata": {
+        "description": "DSC agent (LCM) DSCactionAfterReboot setting. ContinueConfiguration or StopConfiguration"
+      }
+    },
+    "DSCAllowModuleOverwrite": {
+      "type": "bool",
+      "defaultValue": false,
+      "metadata": {
+        "description": "DSC agent (LCM) DSCAllowModuleOverwrite setting"
+      }
+    },
+    "DSCTimeStamp": {
+      "type": "string",
+      "metadata": {
+        "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
+      }
+    }
+
+  },
+
+  "variables": {
+    "UniqueStorageAccountName": "[concat('storage', uniquestring(subscription().subscriptionId, resourceGroup().id))]",
+    "uniqueVMName": "[concat('vm', uniquestring(subscription().subscriptionId, resourceGroup().id))]",
+    "uniquednsNameForPublicIP": "[concat('vm', uniquestring(subscription().subscriptionId, resourceGroup().id))]",
+    "uniqueDatabaseServerName": "[concat('sql', uniquestring(subscription().subscriptionId, resourceGroup().id))]",
+    "agentName": "[concat('agent-', uniquestring(subscription().subscriptionId, resourceGroup().id))]",
+    "DatabaseName": "TicketerDB",
+    "windowsOSVersion": "2016-Datacenter-with-Containers",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "OSDiskName": "[concat(variables('uniqueVMName'),'-osdisk')]",
+    "nicName": "[concat(variables('uniqueVMName'),'-nic')]",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetName": "[concat(variables('uniqueVMName'),'-subnet')]",
+    "subnetPrefix": "10.0.0.0/24",
+    "networkSecurityGroupName": "[concat(variables('uniqueVMName'),'-nsg')]",
+    "storageAccountType": "Standard_LRS",
+    "publicIPAddressName": "[concat(variables('uniqueVMName'),'-pubip')]",
+    "publicIPAddressType": "Dynamic",
+    "vmStorageAccountContainerName": "vhds",
+    "apiVersion": "2015-06-15",
+    "virtualNetworkName": "[concat(variables('uniqueVMName'),'-vnet')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "HTTP",
+            "properties": {
+              "description": "HTTP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTP5000",
+            "properties": {
+              "description": "HTTP API port 5000",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5000",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 150,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "RDP",
+            "properties": {
+              "description": "RDP",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('UniqueStorageAccountName')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
+
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "PublicIPAddress"
+      },
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[tolower(variables('uniquednsNameForPublicIP'))]"
+        }
+      }
+    },
+
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+      ],
+      "tags": {
+        "displayName": "VirtualNetwork"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NetworkInterface"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('uniqueVMName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "VirtualMachine"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('UniqueStorageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computername": "[variables('uniqueVMName')]",
+          "AdminUsername": "[parameters('VMAdminUsername')]",
+          "AdminPassword": "[parameters('VMAdminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('UniqueStorageAccountName')), variables('apiVersion')).primaryEndpoints.blob, variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    },
+
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('uniqueVMName'),'/', parameters('VMExtensionVMAgent'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('uniqueVMName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "VMAccessAgent",
+        "typeHandlerVersion": "2.0",
+        "settings": {},
+        "protectedSettings": null
+      }
+    },
+
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('uniqueVMName'),'/', parameters('VMExtensionMonitoringAgent'))]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('uniqueVMName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+        "type": "MicrosoftMonitoringAgent",
+        "typeHandlerVersion": "1.0",
+        "settings": {
+          "workspaceId": "[parameters('OMSMonitoringAgentWorkspaceID')]"
+        },
+        "protectedSettings": {
+          "workspaceKey": "[parameters('OMSMonitoringAgentWorkspaceKey')]"
+        }
+      }
+    },
+
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('uniqueVMName'),'/VSTSAgent')]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('uniqueVMName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.4",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "fileUris": [
+            "https://raw.githubusercontent.com/DanielLarsenNZ/azure-quickstart-templates/master/visual-studio-vsobuildagent-vm/InstallVSOAgent.ps1"
+          ],
+          "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -Command .\\InstallVSOAgent.ps1 -VSOAccount ', parameters('VSOAccount'), ' -VSOUser ', parameters('VSOUser'), ' -VSOPass ', parameters('VSOPass'), ' -AgentName ', variables('agentName'), ' -PoolName ', parameters('PoolName'))]"
+        }
+      }
+    },
+
+    {
+      "name": "[variables('uniqueDatabaseServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01-preview",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "[variables('uniqueDatabaseServerName')]"
+      },
+      "properties": {
+        "administratorLogin": "[parameters('DBAdminUsername')]",
+        "administratorLoginPassword": "[parameters('DBAdminUsernamePassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('uniqueDatabaseServerName'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "name": "[variables('DatabaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[variables('uniqueDatabaseServerName')]"
+          ],
+          "tags": {
+            "displayName": "IgniteNZ"
+          },
+          "properties": {
+            "collation": "[parameters('DBCollation')]",
+            "edition": "[parameters('DBEdition')]",
+            "maxSizeBytes": "1073741824"
+          }
+        }
+      ]
+    },
+
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "name": "[concat(variables('uniqueVMName'),'/vmExtensionDSC')]",
+      "apiVersion": "2015-06-15",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('uniqueVMName'))]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Powershell",
+        "type": "DSC",
+        "typeHandlerVersion": "2.19",
+        "autoUpgradeMinorVersion": true,
+        "protectedSettings": {
+          "Items": {
+            "RegistrationKeyPrivate": "[parameters('DSCRegistrationKey')]"
+          }
+        },
+        "settings": {
+          "ModulesURL": "[parameters('DSCModulesURL')]",
+          "SasToken": "",
+          "ConfigurationFunction": "[parameters('DSCConfigurationFunction')]",
+          "Properties": [
+            {
+              "Name": "RegistrationKey",
+              "Value": {
+                "UserName": "PLACEHOLDER_DONOTUSE",
+                "Password": "PrivateSettingsRef:RegistrationKeyPrivate"
+              },
+              "TypeName": "System.Management.Automation.PSCredential"
+            },
+            {
+              "Name": "RegistrationURL",
+              "Value": "[parameters('DSCRegistrationURL')]",
+              "TypeName": "System.String"
+            },
+            {
+              "Name": "NodeConfigurationName",
+              "Value": "[parameters('DSCNodeConfigurationName')]",
+              "TypeName": "System.String"
+            },
+            {
+              "Name": "ConfigurationMode",
+              "Value": "[parameters('DSCConfigurationMode')]",
+              "TypeName": "System.String"
+            },
+            {
+              "Name": "ConfigurationModeFrequencyMins",
+              "Value": "[parameters('DSCConfigurationModeFrequencyMins')]",
+              "TypeName": "System.Int32"
+            },
+            {
+              "Name": "RefreshFrequencyMins",
+              "Value": "[parameters('DSCRefreshFrequencyMins')]",
+              "TypeName": "System.Int32"
+            },
+            {
+              "Name": "RebootNodeIfNeeded",
+              "Value": "[parameters('DSCRebootNodeIfNeeded')]",
+              "TypeName": "System.Boolean"
+            },
+            {
+              "Name": "actionAfterReboot",
+              "Value": "[parameters('DSCactionAfterReboot')]",
+              "TypeName": "System.String"
+            },
+            {
+              "Name": "AllowModuleOverwrite",
+              "Value": "[parameters('DSCAllowModuleOverwrite')]",
+              "TypeName": "System.Boolean"
+            },
+            {
+              "Name": "TimeStamp",
+              "Value": "[parameters('DSCTimeStamp')]",
+              "TypeName": "System.String"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "vmName": {
+      "type": "string",
+      "value": "[variables('uniqueVMName')]"
+    },
+    "sqlName": {
+      "type": "string",
+      "value": "[variables('uniqueDatabaseServerName')]"
+    },
+    "hostname": {
+      "type": "string",
+      "value": "[variables('uniquednsNameForPublicIP')]"
+    },
+    "buildAgentName": {
+      "type": "string",
+      "value": "[variables('agentName')]"
+    },
+    "resourceGroupLocation": {
+      "type": "string",
+      "value": "[resourceGroup().location]"
+    }
+  }
+}

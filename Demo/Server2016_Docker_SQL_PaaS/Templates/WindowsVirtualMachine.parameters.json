@@ -1,0 +1,78 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2016-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "VMAdminUsername": {
+      "value": "localadmin"
+    },
+    "VMAdminPassword": {
+      "value": ""
+    },
+    "DBAdminUsername": {
+      "value": "localadmin"
+    },
+    "DBAdminUsernamePassword": {
+      "value": ""
+    },
+    "VMExtensionVMAgent": {
+      "value": "VMAccessAgent"
+    },
+    "VMExtensionMonitoringAgent": {
+      "value": "MicrosoftMonitoringAgent"
+    },
+    "OMSMonitoringAgentWorkspaceID": {
+      "value": ""
+    },
+    "OMSMonitoringAgentWorkspaceKey": {
+      "value": ""
+    },
+    "VSOAccount": {
+      "value": "callumlowe"
+    },
+    "VSOUser": {
+      "value": "ignite2016buildagent"
+    },
+    "VSOPass": {
+      "value": ""
+    },
+    "PoolName": {
+      "value": "Docker"
+    },
+    "DSCModulesURL": {
+      "value": "https://github.com/Azure/azure-quickstart-templates/raw/master/dsc-extension-azure-automation-pullserver/UpdateLCMforAAPull.zip"
+    },
+    "DSCConfigurationFunction": {
+      "value": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull"
+    },
+    "DSCRegistrationKey": {
+      "value": ""
+    },
+    "DSCRegistrationURL": {
+      "value": "https://ase-agentservice-prod-1.azure-automation.net/accounts/d8d8cc7f-ab15-4a83-9fd4-58a7eecc5ba8"
+    },
+    "DSCNodeConfigurationName": {
+      "value": "DockerConfig.MemberServer"
+    },
+    "DSCConfigurationMode": {
+      "value": "ApplyAndAutoCorrect"
+    },
+    "DSCConfigurationModeFrequencyMins": {
+      "value": 15
+    },
+    "DSCRefreshFrequencyMins": {
+      "value": 30
+    },
+    "DSCRebootNodeIfNeeded": {
+      "value": true
+    },
+    "DSCactionAfterReboot": {
+      "value": "ContinueConfiguration"
+    },
+    "DSCAllowModuleOverwrite": {
+      "value": true
+    },
+    "DSCTimeStamp": {
+      "value": "10/24/2016 7:59:00 pm"
+    }
+  }
+}

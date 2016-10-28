@@ -1,0 +1,7 @@
+.vs
+bin
+obj
+packages
+wwwroot
+node_modules
+*.user
