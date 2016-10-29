@@ -2,6 +2,8 @@
 
 Callum Lowe and @DanielLarsenNZ 's demo for the Ignite NZ presentation: [Enabling DevOps from an IT Pro perspective].
 
+![buld status](https://callumlowe.visualstudio.com/_apis/public/build/definitions/9b90607b-70aa-4b0f-9208-a5356a9c71ad/5/badge)
+
 ## Contents
 
 1. [OMS](./1. OMS.md)
@@ -11,7 +13,7 @@ Callum Lowe and @DanielLarsenNZ 's demo for the Ignite NZ presentation: [Enablin
 
 ## Release Configuration
 
-Once @DarqueWarrior open-sources his ['yo vsts'] Yoeman.io generator, we will fork
+Once @DarqueWarrior open-sources his ['yo vsts'] Yeoman.io generator, we will fork
 and PR to add a profile that will add the basic Build and Release configuration
 for this project. In the meantime here are a few notes.
 
