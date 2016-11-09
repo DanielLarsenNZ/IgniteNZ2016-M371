@@ -9,11 +9,25 @@ Callum Lowe and @DanielLarsenNZ 's demo for the Ignite NZ presentation: [Enablin
 1. [Windows Server 2016, Containers, VMA, MMA, VSTSA, DSC.  PaaS SQL](./Windows Server 2016, Containers, VMA, MMA, VSTSA, DSC.  PaaS SQL.md)
 1. [Azure Monitor](./Azure Monitor.md)
 
-## Release Configuration
+## Build Configuration
 
 Once @DarqueWarrior open-sources his ['yo vsts'] Yoeman.io generator, we will fork
 and PR to add a profile that will add the basic Build and Release configuration
 for this project. In the meantime here are a few notes.
+
+### Build API and Publish files
+
+1. Create an _MSBuild_ task.
+1. _Project_ = your API .csproj
+1. MSBuild Arguments = `/p:PublishDestination="$(build.artifactstagingdirectory)\Docker\api\wwwroot" /t:PublishToFileSystem`
+
+#### Copy files to the artefacts folder
+
+1. Create a _Copy files_ task.
+1. _Source Folder_ = `Demo/Docker`
+1. _Target Folder_ = `$(build.artifactstagingdirectory)\Docker`
+
+## Release Configuration
 
 ### Override Template Parameters
 
